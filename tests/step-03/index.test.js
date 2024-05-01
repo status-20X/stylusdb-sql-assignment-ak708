@@ -16,5 +16,7 @@ test("Parse SQL Query", () => {
     fields: ["id", "name", "age"],
     table: "sample",
     whereClauses: [],
+    joinCondition: null,
+    joinTable: null,
   });
 });
