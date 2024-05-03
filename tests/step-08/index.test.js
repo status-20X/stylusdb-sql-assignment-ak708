@@ -20,9 +20,10 @@ test("Parse SQL Query", () => {
     joinCondition: null,
     joinTable: null,
     joinType: null,
+    groupByFields: null,
+    hasAggregateWithoutGroupBy: false,
   });
 });
-
 test("Execute SQL Query", async () => {
   const query = "SELECT id, name FROM student";
   const result = await executeSELECTQuery(query);
@@ -49,6 +50,8 @@ test("Parse SQL Query with WHERE Clause", () => {
     joinCondition: null,
     joinTable: null,
     joinType: null,
+    groupByFields: null,
+    hasAggregateWithoutGroupBy: false,
   });
 });
 
@@ -82,9 +85,10 @@ test("Parse SQL Query with Multiple WHERE Clauses", () => {
     joinCondition: null,
     joinTable: null,
     joinType: null,
+    groupByFields: null,
+    hasAggregateWithoutGroupBy: false,
   });
 });
-
 test("Execute SQL Query with Complex WHERE Clause", async () => {
   const query = "SELECT id, name FROM student WHERE age = 30 AND name = John";
   const result = await executeSELECTQuery(query);
@@ -115,8 +119,10 @@ test("Parse SQL Query with INNER JOIN", async () => {
     table: "student",
     whereClauses: [],
     joinTable: "enrollment",
-    joinCondition: { left: "student.id", right: "enrollment.student_id" },
     joinType: "INNER",
+    joinCondition: { left: "student.id", right: "enrollment.student_id" },
+    groupByFields: null,
+    hasAggregateWithoutGroupBy: false,
   });
 });
 
@@ -131,9 +137,10 @@ test("Parse SQL Query with INNER JOIN and WHERE Clause", async () => {
     joinTable: "enrollment",
     joinType: "INNER",
     joinCondition: { left: "student.id", right: "enrollment.student_id" },
+    groupByFields: null,
+    hasAggregateWithoutGroupBy: false,
   });
 });
-
 test("Execute SQL Query with INNER JOIN", async () => {
   const query =
     "SELECT student.name, enrollment.course FROM student INNER JOIN enrollment ON student.id=enrollment.student_id";
