@@ -1,5 +1,6 @@
 const { parseQuery } = require("./queryParser");
 const readCSV = require("./csvReader");
+
 function performInnerJoin(data, joinData, joinCondition, fields, table) {
   return data.flatMap((mainRow) => {
     return joinData
@@ -18,6 +19,7 @@ function performInnerJoin(data, joinData, joinCondition, fields, table) {
       });
   });
 }
+
 function performLeftJoin(data, joinData, joinCondition, fields, table) {
   return data.flatMap((mainRow) => {
     const matchingJoinRows = joinData.filter((joinRow) => {
@@ -35,10 +37,12 @@ function performLeftJoin(data, joinData, joinCondition, fields, table) {
     );
   });
 }
+
 function getValueFromRow(row, compoundFieldName) {
   const [tableName, fieldName] = compoundFieldName.split(".");
   return row[`${tableName}.${fieldName}`] || row[fieldName];
 }
+
 function performRightJoin(data, joinData, joinCondition, fields, table) {
   // Cache the structure of a main table row (keys only)
   const mainTableRowStructure =
@@ -63,6 +67,7 @@ function performRightJoin(data, joinData, joinCondition, fields, table) {
     return createResultRow(mainRowToUse, joinRow, fields, table, true);
   });
 }
+
 function createResultRow(
   mainRow,
   joinRow,
@@ -108,8 +113,6 @@ function evaluateCondition(row, clause) {
   const rowValue = parseValue(row[field]);
   let conditionValue = parseValue(value);
 
-  // console.log("EVALUATING", rowValue, operator, conditionValue, typeof (rowValue), typeof (conditionValue));
-
   switch (operator) {
     case "=":
       return rowValue === conditionValue;
@@ -151,6 +154,7 @@ function parseValue(value) {
   // Assume value is a string if not a number
   return value;
 }
+
 function applyGroupBy(data, groupByFields, aggregateFunctions) {
   const groupResults = {};
 
@@ -227,6 +231,7 @@ function applyGroupBy(data, groupByFields, aggregateFunctions) {
     return finalGroup;
   });
 }
+
 async function executeSELECTQuery(query) {
   const {
     fields,
@@ -238,6 +243,7 @@ async function executeSELECTQuery(query) {
     groupByFields,
     hasAggregateWithoutGroupBy,
     orderByFields,
+    limit,
   } = parseQuery(query);
   let data = await readCSV(`${table}.csv`);
 
@@ -270,8 +276,6 @@ async function executeSELECTQuery(query) {
   if (hasAggregateWithoutGroupBy) {
     // Special handling for queries like 'SELECT COUNT(*) FROM table'
     const result = {};
-
-    // console.log({ filteredData })
 
     fields.forEach((field) => {
       const match = /(\w+)\((\*|\w+)\)/.exec(field);
@@ -325,6 +329,9 @@ async function executeSELECTQuery(query) {
         return 0;
       });
     }
+    if (limit !== null) {
+      groupResults = groupResults.slice(0, limit);
+    }
     return groupResults;
   } else {
     // Order them by the specified fields
@@ -337,6 +344,10 @@ async function executeSELECTQuery(query) {
         }
         return 0;
       });
+    }
+
+    if (limit !== null) {
+      orderedResults = orderedResults.slice(0, limit);
     }
 
     // Select the specified fields
