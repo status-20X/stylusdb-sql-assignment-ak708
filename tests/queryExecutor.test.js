@@ -360,3 +360,10 @@ test("Execute SQL Query with LIMIT and ORDER BY clause", async () => {
   expect(result[0].name).toEqual("John");
   expect(result[1].name).toEqual("Jane");
 });
+
+test("Error Handling with Malformed Query", async () => {
+  const query = "SELECT FROM table"; // intentionally malformed
+  await expect(executeSELECTQuery(query)).rejects.toThrow(
+    "Error executing query: Query parsing error: Invalid SELECT format"
+  );
+});
