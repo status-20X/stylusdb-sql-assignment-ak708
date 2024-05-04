@@ -14,6 +14,7 @@ test("Parse SQL Query", () => {
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -37,6 +38,7 @@ test("Parse SQL Query with WHERE Clause", () => {
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -65,6 +67,7 @@ test("Parse SQL Query with Multiple WHERE Clauses", () => {
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -83,6 +86,7 @@ test("Parse SQL Query with INNER JOIN", async () => {
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -101,6 +105,7 @@ test("Parse SQL Query with INNER JOIN and WHERE Clause", async () => {
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -162,6 +167,7 @@ test("Parse LEFT Join Query Completely", () => {
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -180,6 +186,7 @@ test("Parse LEFT Join Query Completely", () => {
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -198,6 +205,7 @@ test("Parse SQL Query with LEFT JOIN with a WHERE clause filtering the main tabl
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -217,6 +225,7 @@ test("Parse SQL Query with LEFT JOIN with a WHERE clause filtering the join tabl
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -235,6 +244,7 @@ test("Parse SQL Query with RIGHT JOIN with a WHERE clause filtering the main tab
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -254,6 +264,7 @@ test("Parse SQL Query with RIGHT JOIN with a WHERE clause filtering the join tab
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -271,6 +282,7 @@ test("Parse COUNT Aggregate Query", () => {
     joinType: null,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -288,6 +300,7 @@ test("Parse SUM Aggregate Query", () => {
     joinType: null,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -305,6 +318,7 @@ test("Parse AVG Aggregate Query", () => {
     joinType: null,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -322,6 +336,7 @@ test("Parse MIN Aggregate Query", () => {
     joinType: null,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -339,6 +354,7 @@ test("Parse MAX Aggregate Query", () => {
     joinType: null,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -356,6 +372,7 @@ test("Parse basic GROUP BY query", () => {
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -373,6 +390,7 @@ test("Parse GROUP BY query with WHERE clause", () => {
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -391,6 +409,7 @@ test("Parse GROUP BY query with multiple fields", () => {
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -414,6 +433,7 @@ test("Parse GROUP BY query with JOIN and WHERE clauses", () => {
     hasAggregateWithoutGroupBy: false,
     orderByFields: null,
     limit: null,
+    isDistinct: false,
   });
 });
 
@@ -474,4 +494,116 @@ test("Error Handling with Malformed Query", async () => {
   expect(() => parseQuery(query)).toThrow(
     "Query parsing error: Invalid SELECT format"
   );
+});
+
+test("Parse SQL Query with Basic DISTINCT", () => {
+  const query = "SELECT DISTINCT age FROM student";
+  const parsed = parseQuery(query);
+  expect(parsed).toEqual({
+    fields: ["age"],
+    table: "student",
+    isDistinct: true,
+    whereClauses: [],
+    groupByFields: null,
+    joinType: null,
+    joinTable: null,
+    joinCondition: null,
+    orderByFields: null,
+    limit: null,
+    hasAggregateWithoutGroupBy: false,
+  });
+});
+
+test("Parse SQL Query with DISTINCT and Multiple Columns", () => {
+  const query = "SELECT DISTINCT student_id, course FROM enrollment";
+  const parsed = parseQuery(query);
+  expect(parsed).toEqual({
+    fields: ["student_id", "course"],
+    table: "enrollment",
+    isDistinct: true,
+    whereClauses: [],
+    groupByFields: null,
+    joinType: null,
+    joinTable: null,
+    joinCondition: null,
+    orderByFields: null,
+    limit: null,
+    hasAggregateWithoutGroupBy: false,
+  });
+});
+
+test("Parse SQL Query with DISTINCT and WHERE Clause", () => {
+  const query = 'SELECT DISTINCT course FROM enrollment WHERE student_id = "1"';
+  const parsed = parseQuery(query);
+  expect(parsed).toEqual({
+    fields: ["course"],
+    table: "enrollment",
+    isDistinct: true,
+    whereClauses: [{ field: "student_id", operator: "=", value: '"1"' }],
+    groupByFields: null,
+    joinType: null,
+    joinTable: null,
+    joinCondition: null,
+    orderByFields: null,
+    limit: null,
+    hasAggregateWithoutGroupBy: false,
+  });
+});
+
+test("Parse SQL Query with DISTINCT and JOIN Operations", () => {
+  const query =
+    "SELECT DISTINCT student.name FROM student INNER JOIN enrollment ON student.id = enrollment.student_id";
+  const parsed = parseQuery(query);
+  expect(parsed).toEqual({
+    fields: ["student.name"],
+    table: "student",
+    isDistinct: true,
+    whereClauses: [],
+    groupByFields: null,
+    joinType: "INNER",
+    joinTable: "enrollment",
+    joinCondition: {
+      left: "student.id",
+      right: "enrollment.student_id",
+    },
+    orderByFields: null,
+    limit: null,
+    hasAggregateWithoutGroupBy: false,
+  });
+});
+
+test("Parse SQL Query with DISTINCT, ORDER BY, and LIMIT", () => {
+  const query = "SELECT DISTINCT age FROM student ORDER BY age DESC LIMIT 2";
+  const parsed = parseQuery(query);
+  expect(parsed).toEqual({
+    fields: ["age"],
+    table: "student",
+    isDistinct: true,
+    whereClauses: [],
+    groupByFields: null,
+    joinType: null,
+    joinTable: null,
+    joinCondition: null,
+    orderByFields: [{ fieldName: "age", order: "DESC" }],
+    limit: 2,
+    hasAggregateWithoutGroupBy: false,
+  });
+});
+
+test("Parse SQL Query with DISTINCT on All Columns", () => {
+  const query = "SELECT DISTINCT * FROM student";
+  const parsed = parseQuery(query);
+  expect(parsed).toEqual({
+    fields: ["*"],
+    table: "student",
+    isDistinct: true,
+    whereClauses: [],
+    groupByFields: null,
+    joinType: null,
+    joinTable: null,
+    joinCondition: null,
+    orderByFields: null,
+    limit: null,
+    hasAggregateWithoutGroupBy: false,
+  });
 });
